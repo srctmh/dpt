@@ -24,12 +24,6 @@ Developed by [@SRCTMH](https://t.me/srcmax)
 Open **Termux** and run:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/srctmh/dpt/main/install.sh | bash
-```
-
-If `curl` is missing:
-
-```bash
 pkg install curl -y && curl -sL https://raw.githubusercontent.com/srctmh/dpt/main/install.sh | bash
 ```
 
