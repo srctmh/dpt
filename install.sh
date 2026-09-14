@@ -1,4 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/bash
+# ============================================================
+#  SRC TMH DPT — Professional Installer v3.0.0
+#  Zero-friction setup for fresh Termux
+#  Repo: https://github.com/srctmh/dpt
+# ============================================================
 set -u
 
 TOOL_VERSION="3.0.0"
@@ -10,6 +15,7 @@ CONFIG="${BASE}/config"
 RUNTIME="${BASE}/runtime"
 MIN_SPACE_KB=204800
 
+# ---------- colors ----------
 if [ -t 1 ]; then
   BOLD=$'\033[1m'; RESET=$'\033[0m'
   GREEN=$'\033[32m'; RED=$'\033[31m'
@@ -64,6 +70,7 @@ banner(){
   echo
 }
 
+# ---------- checks ----------
 need_cmd(){ command -v "$1" >/dev/null 2>&1; }
 
 ensure_pkg(){
@@ -80,11 +87,13 @@ ensure_pkg(){
 
 banner
 
+# Termux
 if ! need_cmd pkg; then
   die "Termux required. Open Termux app and run again."
 fi
 ok "Termux environment"
 
+# Internet
 net_ok=0
 for url in "https://api.github.com" "https://github.com" "https://1.1.1.1"; do
   if curl -fsS --connect-timeout 8 --max-time 12 -o /dev/null "$url" 2>/dev/null; then
@@ -92,6 +101,7 @@ for url in "https://api.github.com" "https://github.com" "https://1.1.1.1"; do
     break
   fi
 done
+# curl might not exist yet on brand new Termux
 if [ "$net_ok" -eq 0 ]; then
   if need_cmd pkg; then
     pkg update -y >/dev/null 2>&1 || true
@@ -107,6 +117,7 @@ fi
 [ "$net_ok" -eq 1 ] || die "No internet connection."
 ok "Internet connection"
 
+# Storage
 STORAGE_ROOT=""
 for p in "/storage/emulated/0" "/sdcard" "${HOME}/storage/shared"; do
   if [ -d "$p" ] && [ -w "$p" ]; then STORAGE_ROOT="$p"; break; fi
@@ -128,12 +139,14 @@ else
   ok "Storage ready"
 fi
 
+# Disk space
 avail=$(df "$HOME" 2>/dev/null | awk 'NR==2{print $4}')
 if [ -n "${avail:-}" ] && [ "$avail" -lt "$MIN_SPACE_KB" ] 2>/dev/null; then
   die "Need at least 200MB free space."
 fi
 ok "Disk space OK"
 
+# Dependencies
 echo
 info "Installing dependencies (automatic)..."
 pkg update -y >/dev/null 2>&1 || true
@@ -143,11 +156,13 @@ ensure_pkg wget wget || warn "wget optional — skipped"
 ensure_pkg unzip unzip || die "Could not install unzip"
 ensure_pkg python3 python || ensure_pkg python python || warn "python optional for some features"
 
+# termux-api helps clipboard / open-url (optional)
 if ! need_cmd termux-clipboard-set; then
   info "Installing termux-api (clipboard support)..."
   pkg install -y termux-api >/dev/null 2>&1 || warn "termux-api optional"
 fi
 
+# Java
 if ! need_cmd java; then
   info "Installing Java (this may take a minute)..."
   if ! pkg install -y openjdk-21 >/dev/null 2>&1; then
@@ -157,12 +172,14 @@ if ! need_cmd java; then
   fi
 fi
 need_cmd java || die "Java install failed. Run: pkg install openjdk-21"
+# sanity
 if ! java -version >/dev/null 2>&1; then
   die "Java installed but not working."
 fi
 ok "Java ready"
 ok "All dependencies ready"
 
+# Engine download
 echo
 info "Fetching protection engine..."
 mkdir -p "$TMP"
@@ -198,6 +215,7 @@ JAR=$(find "$RUNTIME" -type f -name "dpt.jar" 2>/dev/null | head -n1)
 ENGINE_DIR=$(dirname "$JAR")
 ok "Engine installed"
 
+# Config
 mkdir -p "$BASE"
 cat > "$CONFIG" <<EOF
 DPT_JAR=$JAR
@@ -209,6 +227,7 @@ STORAGE_ROOT=$STORAGE_ROOT
 EOF
 ok "Configuration saved"
 
+# Install launcher from same folder or repo
 TOOL_SRC="${TMP}/dpt"
 got=0
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
@@ -223,6 +242,7 @@ if [ "$got" -eq 0 ]; then
 fi
 [ "$got" -eq 1 ] || die "Could not locate main tool (dpt)."
 
+# Reject broken protected wrappers that break stdin (safety)
 if head -n 5 "$TOOL_SRC" | grep -q "python3 - "; then
   if grep -q "subprocess.call" "$TOOL_SRC" 2>/dev/null; then
     die "Repo dpt looks like a broken protected build. Upload clean dpt."
@@ -235,6 +255,7 @@ cp "$TOOL_SRC" "${PREFIX}/bin/dpt"
 chmod 755 "${PREFIX}/bin/dpt"
 ok "Launcher installed (command: dpt)"
 
+# Self-test
 if [ ! -x "${PREFIX}/bin/dpt" ]; then die "Self-test: dpt not executable"; fi
 if [ ! -f "$JAR" ]; then die "Self-test: engine jar missing"; fi
 ok "Self-test passed"

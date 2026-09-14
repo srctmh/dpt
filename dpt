@@ -1,6 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/bash
+# ============================================================
+#  SRC TMH DPT TOOL  v3.0.0
+#  APK / AAB Protection Suite
+#  Developed by @SRCTMH
+# ============================================================
 set -u
 
+# -------------------- paths --------------------
 BASE="${HOME}/.srctmh-dpt"
 CONFIG="${BASE}/config"
 CREDITS_FILE="${BASE}/credits.dat"
@@ -15,6 +21,7 @@ ADS_URL="https://c19.lovable.app/dpt-free"
 SECRET_SALT="SRCTMH_DPT_2026_CORE_v1_K9mX2pL7"
 KEY_CHARS="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
+# -------------------- colors --------------------
 if [ -t 1 ]; then
   BOLD=$'\033[1m'; RESET=$'\033[0m'
   GREEN=$'\033[32m'; RED=$'\033[31m'
@@ -25,18 +32,21 @@ else
   BOLD=""; RESET=""; GREEN=""; RED=""; CYAN=""; YELLOW=""; MAGENTA=""; DIM=""; WHITE=""
 fi
 
+# -------------------- UI (fixed-width boxes) --------------------
 BW=36
 
 box_top(){ printf "%s╔══════════════════════════════════════╗%s\n" "$CYAN" "$RESET"; }
 box_bot(){ printf "%s╚══════════════════════════════════════╝%s\n" "$CYAN" "$RESET"; }
 box_mid(){ printf "%s╠══════════════════════════════════════╣%s\n" "$CYAN" "$RESET"; }
 
+# ANSI-safe padding so borders never break
 box_line(){
   local raw="$1"
   local vis len pad sp i=0
   vis=$(printf '%s' "$raw" | sed -E 's/\x1b\[[0-9;]*m//g')
   len=${#vis}
   if [ "$len" -gt "$BW" ]; then
+    # truncate visible only (no ANSI in overflow paths we control)
     vis="${vis:0:$((BW-1))}…"
     raw="$vis"
     len=${#vis}
@@ -52,10 +62,12 @@ clear_screen(){ clear 2>/dev/null || true; }
 pause(){
   echo
   printf " %sPress %sEnter%s%s...%s " "$DIM" "$BOLD" "$RESET" "$DIM" "$RESET"
+  # Always read from terminal, never from a pipe
   read -r _ </dev/tty 2>/dev/null || read -r _ || true
 }
 
 read_input(){
+  # $1 = prompt
   local prompt="${1:- > }"
   local value=""
   printf "%s" "$prompt"
@@ -83,6 +95,7 @@ on_interrupt(){
 }
 trap on_interrupt INT TERM
 
+# -------------------- config --------------------
 require_config(){
   if [ ! -f "$CONFIG" ]; then
     clear_screen
@@ -96,6 +109,7 @@ require_config(){
     printf "  %scd dpt && bash install.sh%s\n\n" "$CYAN" "$RESET"
     exit 1
   fi
+  # shellcheck disable=SC1090
   . "$CONFIG"
   if [ -z "${DPT_JAR:-}" ] || [ ! -f "${DPT_JAR}" ]; then
     clear_screen
@@ -119,6 +133,7 @@ require_config(){
   fi
 }
 
+# -------------------- device id --------------------
 get_device_id(){
   local android_id termux_hash raw hex
   android_id=""
@@ -141,6 +156,7 @@ get_device_id(){
   printf 'SRCTMH-%s\n' "$hex"
 }
 
+# -------------------- credits --------------------
 init_credits(){
   mkdir -p "$BASE"
   if [ ! -f "$CREDITS_FILE" ]; then
@@ -164,12 +180,14 @@ EOF
 
 load_credits(){
   init_credits
+  # shellcheck disable=SC1090
   . "$CREDITS_FILE"
   DEVICE_ID="${device_id:-$(get_device_id)}"
   FREE_CREDITS="${free_credits:-3}"
   VIP_CREDITS="${vip_credits:-0}"
   LAST_RESET="${last_reset:-$(date +%s)}"
 
+  # sanitize numbers
   case "$FREE_CREDITS" in (*[!0-9]*|"") FREE_CREDITS=0 ;; esac
   case "$VIP_CREDITS" in (*[!0-9]*|"") VIP_CREDITS=0 ;; esac
   case "$LAST_RESET" in (*[!0-9]*|"") LAST_RESET=$(date +%s) ;; esac
@@ -227,6 +245,7 @@ deduct_for(){
   return 1
 }
 
+# -------------------- key system --------------------
 hex_to_charset(){
   local hex="$1" len="$2" out="" i=0 byte
   while [ ${#out} -lt "$len" ] && [ "$i" -lt ${#hex} ]; do
@@ -287,6 +306,7 @@ verify_and_activate_key(){
   return 0
 }
 
+# -------------------- kill switch --------------------
 check_kill_switch(){
   local json status msg
   json=$(curl -fsS --connect-timeout 5 --max-time 8 "$KILL_SWITCH_URL" 2>/dev/null || true)
@@ -306,6 +326,7 @@ check_kill_switch(){
   fi
 }
 
+# -------------------- helpers --------------------
 copy_to_clipboard(){
   local text="$1"
   if command -v termux-clipboard-set >/dev/null 2>&1; then
@@ -340,7 +361,9 @@ unique_output_name(){
   printf '%s\n' "${dir}/${base}(${n}).${ext}"
 }
 
+# -------------------- protect animation --------------------
 show_protect_progress(){
+  # $1 = stage 0..5 (how many completed)
   local stage="$1"
   local s1 s2 s3 s4 s5
   s1="${DIM}○${RESET}"; s2="${DIM}○${RESET}"; s3="${DIM}○${RESET}"; s4="${DIM}○${RESET}"; s5="${DIM}○${RESET}"
@@ -349,6 +372,7 @@ show_protect_progress(){
   [ "$stage" -ge 3 ] && s3="${GREEN}✓${RESET}"
   [ "$stage" -ge 4 ] && s4="${GREEN}✓${RESET}"
   [ "$stage" -ge 5 ] && s5="${GREEN}✓${RESET}"
+  # active marker on next pending
   if [ "$stage" -eq 0 ]; then s1="${CYAN}●${RESET}"
   elif [ "$stage" -eq 1 ]; then s2="${CYAN}●${RESET}"
   elif [ "$stage" -eq 2 ]; then s3="${CYAN}●${RESET}"
@@ -367,6 +391,7 @@ show_protect_progress(){
   box_bot
 }
 
+# -------------------- screens --------------------
 free_credits_ads(){
   load_credits
   clear_screen
@@ -454,6 +479,7 @@ main_menu(){
     echo
     local choice
     choice=$(read_input " ${BOLD}Select:${RESET} ")
+    # trim spaces
     choice=$(printf '%s' "$choice" | tr -d '[:space:]')
     case "$choice" in
       1) protect_flow ;;
@@ -471,6 +497,7 @@ main_menu(){
         exit 0
         ;;
       "")
+        # empty enter — do not spam invalid
         ;;
       *)
         printf "  %sInvalid option — choose 1-6%s\n" "$YELLOW" "$RESET"
@@ -497,6 +524,7 @@ protect_flow(){
   apk_path=$(read_input " ${GREEN}>${RESET} ")
   apk_path="${apk_path#\"}"; apk_path="${apk_path%\"}"
   apk_path="${apk_path#\'}"; apk_path="${apk_path%\'}"
+  # expand ~ 
   case "$apk_path" in
     "~/"*) apk_path="${HOME}/${apk_path#~/}" ;;
   esac
@@ -570,11 +598,13 @@ protect_flow(){
   rm -rf "$work_dir"
   mkdir -p "$work_dir"
 
+  # Animated steps before engine
   show_protect_progress 0; sleep 0.45
   show_protect_progress 1; sleep 0.45
   show_protect_progress 2; sleep 0.35
 
   log_out="${work_dir}/run.log"
+  # Run engine in background so we can animate
   (
     cd "$DPT_RUNTIME" || exit 90
     if [ "${#extra_flags[@]}" -gt 0 ]; then
@@ -585,11 +615,13 @@ protect_flow(){
   ) >"$log_out" 2>&1 &
   local eng_pid=$!
 
+  # While engine runs, show stage 3
   show_protect_progress 3
   local waited=0
   while kill -0 "$eng_pid" 2>/dev/null; do
     sleep 0.5
     waited=$((waited + 1))
+    # after some time move to signing visual
     if [ "$waited" -eq 4 ]; then show_protect_progress 4; fi
   done
   wait "$eng_pid"
@@ -802,6 +834,7 @@ about_screen(){
   done
 }
 
+# -------------------- entry --------------------
 require_config
 check_kill_switch
 load_credits
