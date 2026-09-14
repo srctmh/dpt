@@ -1,79 +1,46 @@
-# SRC TMH DPT Tool
+# SRC TMH DPT v3.0
 
-**APK / AAB Protection Suite** for Termux.
+Professional APK / AAB Protection Suite for Termux.
 
-Developed by [@SRCTMH](https://t.me/srcmax)
-
----
-
-## Features
-
-- Protect APK / AAB with dpt-shell engine
-- Free credits (3 per week) + VIP permanent credits
-- Device-bound activation keys
-- Automatic installer (fresh Termux friendly)
-- Kill switch + remote control
-- Colorful professional terminal UI
-- Protection history
-- Works on major Android devices (including Redmi)
-
----
-
-## One-Command Install
-
-Open **Termux** and run:
+## Install (2 commands only)
 
 ```bash
-pkg install curl -y && curl -sL https://raw.githubusercontent.com/srctmh/dpt/main/install.sh | bash
+pkg install git -y
+git clone https://github.com/srctmh/dpt.git && cd dpt && bash install.sh
 ```
 
----
+`install.sh` installs everything automatically (Java, Python, curl, engine, launcher).
 
-## Usage
-
-After install, simply run:
+## Run
 
 ```bash
 dpt
 ```
 
----
+## Credits
 
-## First Time Notes
+| Type | Cost |
+|------|------|
+| Normal Protection | 1 credit |
+| Signature Verification | 3 Free **or** 1 VIP credit |
 
-1. Allow **storage permission** when asked (`termux-setup-storage`)
-2. Internet required only for install / updates
-3. Protected files are saved to:
-   ```
-   /storage/emulated/0/SRCTMH PROTECTION/
-   ```
+- Free: 3 credits every 7 days
+- VIP: permanent (activation key from admin)
+- Ads free credits: copies Device ID → opens https://c19.lovable.app/dpt-free
 
----
+## Output folder
 
-## Credits System
+```text
+/storage/emulated/0/@SRCTMH/
+```
 
-| Type | Amount | Expiry |
-|------|--------|--------|
-| Free | 3 credits | Resets every 7 days |
-| VIP  | From activation key | Never expires |
+## Admin
 
-To get VIP credits:
-1. Open tool → **Upgrade / Activate Key**
-2. Copy your **Device ID**
-3. Send it to [@srcmax](https://t.me/srcmax)
-4. Enter the key you receive
-
----
+- VIP keys: private generator (Device ID bound)
+- Kill switch: `version.json` → `"status": "disabled"`
 
 ## Support
 
-- Telegram: [@srcmax](https://t.me/srcmax)
-- Channel: [@srctmh](https://t.me/srctmh)
-- Instagram: [@srctmh](https://instagram.com/srctmh)
+Telegram [@srcmax](https://t.me/srcmax) · Channel [@srctmh](https://t.me/srctmh)
 
----
-
-## Disclaimer
-
-This tool uses the open-source [dpt-shell](https://github.com/luoyesiqiu/dpt-shell) engine.  
-Use responsibly. Developer is not responsible for misuse.
+Developed by @SRCTMH
