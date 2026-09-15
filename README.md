@@ -1,46 +1,85 @@
-# SRC TMH DPT v3.0
+# SRC TMH DPT Tool
 
-Professional APK / AAB Protection Suite for Termux.
+**APK / AAB Protection Suite** for Termux.
 
-## Install (2 commands only)
+Developed by [@SRCTMH](https://t.me/srcmax)
+
+---
+
+## Features
+
+- Protect APK / AAB with dpt-shell engine
+- Free credits (3 per week) + VIP permanent credits
+- Device-bound activation keys
+- Automatic installer (fresh Termux friendly)
+- Kill switch + remote control
+- Colorful professional terminal UI
+- Protection history
+- Works on major Android devices (including Redmi)
+
+---
+
+## One-Command Install
+
+Open **Termux** and run:
 
 ```bash
-pkg install git -y
-git clone https://github.com/srctmh/dpt.git && cd dpt && bash install.sh
+curl -sL https://raw.githubusercontent.com/srctmh/dpt/main/install.sh | bash
 ```
 
-`install.sh` installs everything automatically (Java, Python, curl, engine, launcher).
+If `curl` is missing:
 
-## Run
+```bash
+pkg install curl -y && curl -sL https://raw.githubusercontent.com/srctmh/dpt/main/install.sh | bash
+```
+
+---
+
+## Usage
+
+After install, simply run:
 
 ```bash
 dpt
 ```
 
-## Credits
+---
 
-| Type | Cost |
-|------|------|
-| Normal Protection | 1 credit |
-| Signature Verification | 3 Free **or** 1 VIP credit |
+## First Time Notes
 
-- Free: 3 credits every 7 days
-- VIP: permanent (activation key from admin)
-- Ads free credits: copies Device ID → opens https://c19.lovable.app/dpt-free
+1. Allow **storage permission** when asked (`termux-setup-storage`)
+2. Internet required only for install / updates
+3. Protected files are saved to:
+   ```
+   /storage/emulated/0/SRCTMH PROTECTION/
+   ```
 
-## Output folder
+---
 
-```text
-/storage/emulated/0/@SRCTMH/
-```
+## Credits System
 
-## Admin
+| Type | Amount | Expiry |
+|------|--------|--------|
+| Free | 3 credits | Resets every 7 days |
+| VIP  | From activation key | Never expires |
 
-- VIP keys: private generator (Device ID bound)
-- Kill switch: `version.json` → `"status": "disabled"`
+To get VIP credits:
+1. Open tool → **Upgrade / Activate Key**
+2. Copy your **Device ID**
+3. Send it to [@srcmax](https://t.me/srcmax)
+4. Enter the key you receive
+
+---
 
 ## Support
 
-Telegram [@srcmax](https://t.me/srcmax) · Channel [@srctmh](https://t.me/srctmh)
+- Telegram: [@srcmax](https://t.me/srcmax)
+- Channel: [@srctmh](https://t.me/srctmh)
+- Instagram: [@srctmh](https://instagram.com/srctmh)
 
-Developed by @SRCTMH
+---
+
+## Disclaimer
+
+This tool uses the open-source [dpt-shell](https://github.com/luoyesiqiu/dpt-shell) engine.  
+Use responsibly. Developer is not responsible for misuse.
